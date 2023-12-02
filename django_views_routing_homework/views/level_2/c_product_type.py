@@ -38,10 +38,10 @@ PRODUCTS = [
 
 def get_products_view(request):
     products = []
-
-    if request.GET.get('type'):
+    get_type = request.GET.get('type')
+    if get_type:
         for each in PRODUCTS:
-            if each['type'] == request.GET['type']:
+            if each['type'] == get_type:
                 products.append(each)
         if not products:
             products = PRODUCTS
