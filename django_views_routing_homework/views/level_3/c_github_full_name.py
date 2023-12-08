@@ -8,9 +8,16 @@
 - если пользователя на Гитхабе нет, верните ответ с пустым телом и статусом 404
 - если пользователь на Гитхабе есть, но имя у него не указано, верните None вместо имени
 """
-
-from django.http import HttpResponse, HttpRequest
+import django.http
+import requests
+from django.http import HttpResponse, HttpRequest, Http404
 
 
 def fetch_name_from_github_view(request: HttpRequest, github_username: str) -> HttpResponse:
-    pass  # код писать тут
+    data = requests.get(f'https://api.github.com/users/{github_username}').json()
+    if data.get('message') == 'Not Found':
+        raise Http404
+    elif data['name']:
+        return HttpResponse(data['name'])
+    else:
+        return HttpResponse('None')
