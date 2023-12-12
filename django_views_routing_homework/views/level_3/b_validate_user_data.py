@@ -18,8 +18,9 @@
 Когда будете писать код, не забывайте о читаемости, поддерживаемости и модульности.
 """
 import json
-import re
 
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, JsonResponse
 from json import JSONDecodeError
 
@@ -28,13 +29,12 @@ def validate_user_data_view(request: HttpRequest) -> HttpResponse:
     # return HttpResponse((type(request.body), json.loads(request.body)))
     try:
         data = json.loads(request.body)
-    except JSONDecodeError:
+        validate_email(data['email'])
+    except (JSONDecodeError, ValidationError):
         data = {}
     if data:
-        regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+'
-                           r'@[A-Za-z0-9-]+(\.[A-Z|a-z]{3,})+')
         if (5 < len(data['full_name']) < 256
-                and re.fullmatch(regex, data['email'])
+                and data['email']
                 and data['registered_from'] in ['website', 'mobile_app']
                 and (
                         str(data.get('age')).isnumeric()

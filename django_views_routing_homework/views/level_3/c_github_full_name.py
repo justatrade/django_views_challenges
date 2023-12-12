@@ -9,6 +9,7 @@
 - если пользователь на Гитхабе есть, но имя у него не указано, верните None вместо имени
 """
 import requests
+
 from django.http import HttpResponse, HttpRequest
 
 
