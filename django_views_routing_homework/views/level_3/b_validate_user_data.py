@@ -17,9 +17,31 @@
 Для тестирования рекомендую использовать Postman.
 Когда будете писать код, не забывайте о читаемости, поддерживаемости и модульности.
 """
+import json
 
-from django.http import HttpResponse, HttpRequest
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, JsonResponse
+from json import JSONDecodeError
 
 
 def validate_user_data_view(request: HttpRequest) -> HttpResponse:
-    pass  # код писать тут
+    # return HttpResponse((type(request.body), json.loads(request.body)))
+    try:
+        data = json.loads(request.body)
+        validate_email(data['email'])
+    except (JSONDecodeError, ValidationError):
+        data = {}
+    if data:
+        if (5 < len(data['full_name']) < 256
+                and data['email']
+                and data['registered_from'] in ['website', 'mobile_app']
+                and (
+                        str(data.get('age')).isnumeric()
+                        if data.get('age') else True
+                )):
+            return JsonResponse({"is_valid": True})
+        else:
+            return JsonResponse({"is_valid": False})
+    else:
+        return HttpResponseBadRequest('bad request')
